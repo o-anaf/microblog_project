@@ -1,0 +1,14 @@
+# ignore virtual environments
+venv/
+env/
+
+# Byte-compiled / optimized / DLL Files
+__pycache__/
+*py[cod]
+
+# Environment variables
+.env
+
+# Ignore IDE settings 
+.vscode/
+.idea/
