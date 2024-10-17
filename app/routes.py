@@ -2,6 +2,12 @@ from app import flask_app
 from flask import render_template, flash, redirect, url_for
 from app.forms import LoginForm
 
+from flask_login import current_user, login_user
+import sqlalchemy as sa
+from app import db
+from app.models import User
+
+
 @flask_app.route('/')
 @flask_app.route('/index')
 def index():
@@ -15,9 +21,14 @@ def index():
 
 @flask_app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     login_form = LoginForm()
     if login_form.validate_on_submit():
-        flash('Login resquested for user {}, remember_me={}'.format(
-            login_form.username.data, login_form.remember_me.data))
-        return redirect(url_for('index'))
-    return render_template('login.html', form=login_form)
+        user = db.session.scalar(
+            sa.select(User).where(User.username == login_form.username.data))
+        if user is None or not user.check_password(login_form.password.data)
+            flash('Invalid username or password')
+            return redirect(url_for('index'))
+        login_user(user, remember=login_form.remember_me.data)
+    return render_template('login.html', title='Sign In' form=login_form)
